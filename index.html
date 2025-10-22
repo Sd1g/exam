@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Demand Forecasting with RNN</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .progress { margin: 10px 0; padding: 10px; background: #e9ecef; border-radius: 5px; }
+        .data-preview { max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .config-item { display: flex; flex-direction: column; }
+        .config-item label { margin-bottom: 5px; font-weight: bold; }
+        .config-item input, .config-item select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .status-success { color: #28a745; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
+        .status-info { color: #17a2b8; font-weight: bold; }
+        .results { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚕 Taxi Demand Forecasting with RNN</h1>
+        
+        <div class="section">
+            <h2>1. Upload Raw Taxi Data</h2>
+            <input type="file" id="fileInput" accept=".csv">
+            <button onclick="loadRawData()">Load Raw CSV Data</button>
+            <div id="dataStatus" class="status-info"></div>
+            
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>Aggregation Level:</label>
+                    <select id="aggregationLevel">
+                        <option value="daily">Daily</option>
+                        <option value="hourly">Hourly</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label>Region Size (degrees):</label>
+                    <input type="number" id="regionSize" value="0.05" step="0.01" min="0.01" max="1.0">
+                </div>
+            </div>
+            
+            <button onclick="processRawData()">Process Raw Data</button>
+            <div id="dataPreview" class="data-preview"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Model Configuration</h2>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>Sequence Length (days):</label>
+                    <input type="number" id="sequenceLength" value="14" min="7" max="30">
+                </div>
+                <div class="config-item">
+                    <label>Training Ratio:</label>
+                    <input type="number" id="trainRatio" value="0.8" min="0.1" max="0.9" step="0.1">
+                </div>
+                <div class="config-item">
+                    <label>RNN Units:</label>
+                    <input type="number" id="rnnUnits" value="64" min="16" max="256">
+                </div>
+                <div class="config-item">
+                    <label>Epochs:</label>
+                    <input type="number" id="epochs" value="50" min="10" max="200">
+                </div>
+            </div>
+            <button onclick="prepareTrainingData()">Prepare Training Data</button>
+            <div id="dataPrepStatus" class="status-info"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Model Training</h2>
+            <button onclick="createModel()">Create Model</button>
+            <button onclick="trainModel()" id="trainBtn" disabled>Train Model</button>
+            <button onclick="evaluateModel()" id="evalBtn" disabled>Evaluate Model</button>
+            <button onclick="predictFuture()" id="predictBtn" disabled>Predict Future</button>
+            <div class="progress">
+                <div id="trainingProgress"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Results</h2>
+            <div class="results">
+                <div id="performanceMetrics"></div>
+                <div id="futurePredictions"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. Model Management</h2>
+            <button onclick="saveModel()" id="saveBtn" disabled>Save Model</button>
+            <button onclick="loadModel()">Load Model</button>
+            <input type="file" id="modelUpload" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+    <script src="data-processor.js"></script>
+    <script src="rnn-model.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
